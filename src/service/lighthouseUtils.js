@@ -76,7 +76,41 @@ const getOverallReport = async (result) => {
     return report;
 };
 
+
+const launchChromeAndRunLighthouse = async (url) => {
+    log.info(`launching lighthouse and chrome: ${url}`);
+
+    const lighthouse = (await import('lighthouse')).default;
+    const chromeLauncher = await import('chrome-launcher');
+
+    try {
+        log.info(`launching chrome`);
+        const chrome = await chromeLauncher.launch({
+            protocolTimeout: 30000,
+        });
+
+        log.info(`chrome port - ${chrome.port}`);
+        const opts = {
+            port: chrome.port
+        };
+
+        log.info(`launching lighthouse`);
+        const results = await lighthouse(url, opts);
+
+        log.info(results);
+        await chrome.kill();
+
+        return {
+            js: results.lhr,
+            json: results.report
+        };
+    } catch (e) {
+        console.error(e);
+    }
+};
+
 module.exports = {
+    launchChromeAndRunLighthouse,
     compareReports,
     getOverallReport,
 };
