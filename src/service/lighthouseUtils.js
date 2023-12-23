@@ -3,7 +3,7 @@ const fs = require('fs');
 // Lighthouse utility functions
 const compareReports = (from, to) => {
     const reports = [];
-    log.info(`Comparing reports`);
+    console.elog(`Comparing reports`);
 
     const metricFilter = [
         'first-contentful-paint',
@@ -71,21 +71,21 @@ const getOverallReport = async (result) => {
 
     for (let auditObj in result['audits']) if (metricFilter.includes(auditObj)) report[auditObj] = result['audits'][auditObj].numericValue;
 
-    log.info(`lighthouse report`);
-    log.info(JSON.stringify(report));
+    console.elog(`lighthouse report`);
+    console.elog(JSON.stringify(report));
     return report;
 };
 
 
 
 const launchChromeAndRunLighthouse = async (url) => {
-    log.info(`launching lighthouse and chrome: ${url}`);
+    console.elog(`launching lighthouse and chrome: ${url}`);
 
     const lighthouse = (await import('lighthouse')).default;
     const chromeLauncher = await import('chrome-launcher');
 
     try {
-        log.info(`launching chrome`);
+        console.elog(`launching chrome`);
         const chrome = await chromeLauncher.launch({
             protocolTimeout: 30000,
             chromeFlags: ['--headless', '--no-sandbox', 
@@ -93,15 +93,15 @@ const launchChromeAndRunLighthouse = async (url) => {
             '--disable-network-throttling', '--disable-cpu-throttling']
         });
 
-        log.info(`chrome port - ${chrome.port}`);
+        console.elog(`chrome port - ${chrome.port}`);
         const opts = {
             port: chrome.port
         };
 
-        log.info(`launching lighthouse`);
+        console.elog(`launching lighthouse`);
         const results = await lighthouse(url, opts);
 
-        log.info(results);
+        console.elog(results);
         await chrome.kill();
 
         return {
@@ -109,8 +109,7 @@ const launchChromeAndRunLighthouse = async (url) => {
             json: results.report
         };
     } catch (e) {
-        log.error(e);
-        // throw new Error(e);
+        console.error(e);
     }
 };
 
